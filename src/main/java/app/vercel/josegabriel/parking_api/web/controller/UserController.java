@@ -10,9 +10,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,19 +27,19 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/users")
 @RequiredArgsConstructor
-@Tag(name = "Users", description = "Contains all user endpoints.")
+@Tag(name = "Users", description = "Operações relacionadas aos usuários")
 public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "Create a new user", responses = {
-            @ApiResponse(responseCode = "201", description = "User created successfully",
+    @Operation(summary = "Cria um novo usuário", responses = {
+            @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-            @ApiResponse(responseCode = "409", description = "Username already exists",
+            @ApiResponse(responseCode = "409", description = "Email já cadastrado",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "422", description = "Invalid fields",
+            @ApiResponse(responseCode = "422", description = "Campos inválidos",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
-    })
+    }, description = "Cria um novo usuário, autenticação não é requerida")
     @PostMapping
     public ResponseEntity<UserResponseDTO> create(@RequestBody @Valid UserCreateDTO user) {
         User userEntity = userService.save(new User(user));
@@ -43,23 +47,32 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponseDTO(userEntity));
     }
 
-    @Operation(summary = "Get all users", responses = {
-            @ApiResponse(responseCode = "200", description = "Return a list of users",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-    })
+    @Operation(summary = "Obtém todos os usuários",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Retorna todos os usuários",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+                    @ApiResponse(responseCode = "403", description = "Permissão insuficiente",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            }, description = "Obtém todos os usuários, autenticação é requerida e apenas um admin pode ver todos os usuários")
     @GetMapping
-    public ResponseEntity<List<UserResponseDTO>> getAll() {
-        List<UserResponseDTO> users = userService.findAll().stream().map(UserResponseDTO::new).toList();
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserResponseDTO>> getAll(@PageableDefault(size = 5)Pageable page) {
+        Page<UserResponseDTO> users = userService.findAll(page).map(UserResponseDTO::new);
 
         return ResponseEntity.ok(users);
     }
 
-    @Operation(summary = "Get a user by id", responses = {
-            @ApiResponse(responseCode = "200", description = "User found successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
-    })
+    @Operation(summary = "Obtém um usuário pelo id",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuário encontrado",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDTO.class))),
+                    @ApiResponse(responseCode = "403", description = "Permissão insuficiente",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            }, description = "Obtém um usuário pelo id, autenticação é requerida e apenas o usuário ou um admin pode ver o usuário")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN') OR #id == principal.id")
     public ResponseEntity<UserResponseDTO> getById(@PathVariable Long id) {
@@ -68,15 +81,20 @@ public class UserController {
         return ResponseEntity.ok(new UserResponseDTO(user));
     }
 
-    @Operation(summary = "Update password", responses = {
-            @ApiResponse(responseCode = "204", description = "Password updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "400", description = "Passwords do not match or invalid password",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
-    })
+    @Operation(summary = "Atualiza a senha do usuário",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Senha atualizada com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = Void.class))),
+                    @ApiResponse(responseCode = "400", description = "Senhas não conferem ou senha inválida",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "403", description = "Permissão insuficiente",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            }, description = "Atualiza a senha do usuário, autenticação é requerida e apenas o usuário pode atualizar sua senha")
     @PatchMapping("/{id}")
+    @PreAuthorize("#id == principal.id")
     public ResponseEntity<Void> updatePassword(@RequestBody @Valid UserUpdatePasswordDTO data,
                                                @PathVariable Long id) {
         userService.updatePassword(id,

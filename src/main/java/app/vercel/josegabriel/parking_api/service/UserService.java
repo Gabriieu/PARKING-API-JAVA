@@ -7,6 +7,8 @@ import app.vercel.josegabriel.parking_api.exception.UsernameUniqueViolationExcep
 import app.vercel.josegabriel.parking_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +29,18 @@ public class UserService {
             return userRepository.save(user);
         } catch (
                 DataIntegrityViolationException exception) {
-            throw new UsernameUniqueViolationException("Username already exists");
+            throw new UsernameUniqueViolationException("Username já cadastrado");
         }
     }
 
     @Transactional(readOnly = true)
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
     }
 
     @Transactional(readOnly = true)
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
     }
 
     @Transactional(readOnly = true)
@@ -49,20 +51,20 @@ public class UserService {
     @Transactional
     public void updatePassword(Long id, String password, String newPassword, String confirmPassword) {
         if (!newPassword.equals(confirmPassword)) {
-            throw new InvalidPasswordException("Passwords do not match");
+            throw new InvalidPasswordException("Senhas não conferem");
         }
 
         User user = findById(id);
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidPasswordException("Invalid password");
+            throw new InvalidPasswordException("Senha inválida");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
     }
 
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public Page<User> findAll(Pageable page) {
+        return userRepository.findAll(page);
     }
 }
