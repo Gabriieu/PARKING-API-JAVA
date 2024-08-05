@@ -9,6 +9,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static app.vercel.josegabriel.parking_api.entity.parking.ParkingSpace.Status.LIVRE;
+
 @Service
 @RequiredArgsConstructor
 public class ParkingSpaceService {
@@ -28,5 +30,11 @@ public class ParkingSpaceService {
     @Transactional(readOnly = true)
     public ParkingSpace findByCode(String code) {
         return parkingSpaceRepository.findParkingSpaceByCode(code).orElseThrow(() -> new EntityNotFoundException("Vaga não encontrada"));
+    }
+
+    @Transactional(readOnly = true)
+    public ParkingSpace findFirstAvailable() {
+        return parkingSpaceRepository.findFirstByStatus(LIVRE)
+                .orElseThrow(() -> new EntityNotFoundException("Nenhuma vaga disponível"));
     }
 }

@@ -29,7 +29,8 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public Client findById(Long id) {
-        return clientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+        return clientRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
     }
 
     @Transactional(readOnly = true)
@@ -39,6 +40,13 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public Client findByUserId(Long id) {
-        return clientRepository.findByUserId(id).orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+        return clientRepository.findByUserId(id)
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+    }
+
+    @Transactional(readOnly = true)
+    public Client findByCpf(String cpf) {
+        return clientRepository.findClientByCpf(cpf)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Cliente com CPF %s não encontrado", cpf)));
     }
 }

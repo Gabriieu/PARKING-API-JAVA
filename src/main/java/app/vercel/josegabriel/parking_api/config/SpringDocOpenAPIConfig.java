@@ -19,11 +19,11 @@ public class SpringDocOpenAPIConfig {
                 .info(
                         new Info()
                                 .title("REST API - PARKING API")
-                                .description("REST API for a parking system management")
+                                .description("REST API para gerenciamento de estacionamento")
                                 .version("v1")
                                 .license(new License().name("Apache 2.0").url("https://www.apache.org/licenses/LICENSE-2.0"))
-                                .contact(new Contact().name("José Gabriel").email("gabriel.souzamorais@gmail.com"))
-                );
+                                .contact(new Contact().name("José Gabriel").url("https://www.linkedin.com/in/jos%C3%A9gabrielsouza/")
+                                ));
     }
 
     private SecurityScheme securityScheme() {
