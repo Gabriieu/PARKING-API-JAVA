@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorMessage> MethodArgumentNotValidException(MethodArgumentNotValidException exception,
+    public ResponseEntity<ErrorMessage> methodArgumentNotValidException(MethodArgumentNotValidException exception,
                                                                         HttpServletRequest request,
                                                                         BindingResult result) {
         log.error("Api Error - " + exception.getMessage());
@@ -29,7 +29,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler({UsernameUniqueViolationException.class,
             CpfUniqueViolationException.class,
             CodeUniqueViolationException.class})
-    public ResponseEntity<ErrorMessage> UniqueViolationException(RuntimeException exception,
+    public ResponseEntity<ErrorMessage> uniqueViolationException(RuntimeException exception,
                                                                  HttpServletRequest request) {
         log.error("Api Error - " + exception.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -38,7 +38,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorMessage> EntityNotFoundException(RuntimeException exception,
+    public ResponseEntity<ErrorMessage> entityNotFoundException(RuntimeException exception,
                                                                 HttpServletRequest request) {
         log.error("Api Error - " + exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -47,7 +47,7 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ErrorMessage> InvalidPasswordException(RuntimeException exception,
+    public ResponseEntity<ErrorMessage> invalidPasswordException(RuntimeException exception,
                                                                  HttpServletRequest request) {
         log.error("Api Error - " + exception.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -56,12 +56,25 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorMessage> AccessDeniedException(AccessDeniedException exception,
+    public ResponseEntity<ErrorMessage> accessDeniedException(AccessDeniedException exception,
                                                               HttpServletRequest request) {
         log.error("Api Error - " + exception.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorMessage(request, HttpStatus.FORBIDDEN, exception.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> internalServerError(Exception exception, HttpServletRequest request) {
+        String error = new ErrorMessage(request,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()).toString();
+
+        log.error("Internal Server Error - {} {}" + error, exception.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(error);
     }
 
 }

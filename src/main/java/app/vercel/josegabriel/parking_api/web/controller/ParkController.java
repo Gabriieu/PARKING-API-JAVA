@@ -7,6 +7,7 @@ import app.vercel.josegabriel.parking_api.entity.clientPark.dto.ClientParkRespon
 import app.vercel.josegabriel.parking_api.jwt.JwtUserDetails;
 import app.vercel.josegabriel.parking_api.service.ClientParkService;
 import app.vercel.josegabriel.parking_api.service.ClientService;
+import app.vercel.josegabriel.parking_api.service.JasperService;
 import app.vercel.josegabriel.parking_api.service.ParkService;
 import app.vercel.josegabriel.parking_api.web.exception.ErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,12 +27,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 
@@ -43,6 +47,7 @@ public class ParkController {
     private final ParkService parkService;
     private final ClientService clientService;
     private final ClientParkService clientParkService;
+    private final JasperService jasperService;
 
     @Operation(summary = "Operações de check-in", description = "Realiza o check-in de um cliente",
             security = @SecurityRequirement(name = "security"),
@@ -190,5 +195,21 @@ public class ParkController {
                 .map(ClientParkResponseDTO::new);
 
         return ResponseEntity.ok(parks);
+    }
+
+    @GetMapping("/report")
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity<Void> getReport(HttpServletResponse response,
+                                          @AuthenticationPrincipal JwtUserDetails userDetails) throws IOException {
+
+        String userCpf = clientService.findByUserId(userDetails.getId()).getCpf();
+        jasperService.addParams("cpf", userCpf);
+        byte[] bytes = jasperService.generatePdf();
+
+        response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + userCpf + "_" + System.currentTimeMillis() + ".pdf");
+        response.getOutputStream().write(bytes);
+
+        return ResponseEntity.ok().build();
     }
 }
