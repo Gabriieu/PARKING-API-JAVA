@@ -38,7 +38,7 @@ Crie um banco de dados e configure as credenciais no arquivo `application.proper
 ![img_5.png](img_5.png)
 
 > [!NOTE]
-> Para visualizar a documentação completa é necessária executar a aplicação e acessar o link abaixo
+> Para visualizar a documentação completa é necessário executar a aplicação e acessar o link abaixo
 > 
 - [Detalhes da documentação](http://localhost:8080/swagger-ui/index.html#/)
 
@@ -47,6 +47,23 @@ Crie um banco de dados e configure as credenciais no arquivo `application.proper
 
 ![img.png](img.png)
 
+### Lógica dos Preços
+
+- **Até 15 minutos:** R$ 5,00
+- **Até 60 minutos:** R$ 9,25
+- **Para cada 15 minutos adicionais:** R$ 1,75
+
+
+**Descontos:**
+
+- Clientes que realizam a 10ª visita recebem um desconto de 30% no valor total.
+
+
+**Geração de Recibo:**
+
+- Ao realizar um check-in, o número do recibo é gerado automaticamente no formato:
+  `PLACA-YYYYMMDD-HHMMSS`
+    
 
 # Getting Started
 
