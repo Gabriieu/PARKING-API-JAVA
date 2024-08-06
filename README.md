@@ -31,7 +31,17 @@ Crie um banco de dados e configure as credenciais no arquivo `application.proper
 
 ### Documentação
 
-- **Toda a documentação pode ser obtida neste link**: [Documentação da API](http://localhost:8080/swagger-ui/index.html#/)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
+![img_4.png](img_4.png)
+![img_5.png](img_5.png)
+
+> [!NOTE]
+> Para visualizar a documentação completa é necessária executar a aplicação e acessar o link abaixo
+> 
+- [Detalhes da documentação](http://localhost:8080/swagger-ui/index.html#/)
+
 
 ### Modelo do Relatório
 
