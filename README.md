@@ -64,3 +64,7 @@ Crie um banco de dados e configure as credenciais no arquivo `application.proper
 - Ao realizar um check-in, o número do recibo é gerado automaticamente no formato:
   `PLACA-YYYYMMDD-HHMMSS`
 - Exemplo: `ABC1234-20240806-135407`
+
+### Diagrama do banco de dados
+
+![img_6.png](img_6.png)
