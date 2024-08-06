@@ -1,11 +1,13 @@
 package app.vercel.josegabriel.parking_api.service;
 
 import app.vercel.josegabriel.parking_api.entity.parking.ParkingSpace;
+import app.vercel.josegabriel.parking_api.entity.parking.dto.ParkingSpaceCreateDTO;
 import app.vercel.josegabriel.parking_api.exception.CodeUniqueViolationException;
 import app.vercel.josegabriel.parking_api.exception.EntityNotFoundException;
 import app.vercel.josegabriel.parking_api.repository.ParkingSpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,5 +38,13 @@ public class ParkingSpaceService {
     public ParkingSpace findFirstAvailable() {
         return parkingSpaceRepository.findFirstByStatus(LIVRE)
                 .orElseThrow(() -> new EntityNotFoundException("Nenhuma vaga disponível"));
+    }
+
+    @Transactional
+    public void delete(String code) {
+        var park = parkingSpaceRepository.findParkingSpaceByCode(code)
+                .orElseThrow(() -> new EntityNotFoundException("Vaga não encontrada"));
+        parkingSpaceRepository.delete(park);
+        ResponseEntity.noContent().build();
     }
 }

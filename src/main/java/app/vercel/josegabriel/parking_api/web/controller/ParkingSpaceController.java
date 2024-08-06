@@ -6,6 +6,7 @@ import app.vercel.josegabriel.parking_api.entity.parking.dto.ParkingSpaceRespons
 import app.vercel.josegabriel.parking_api.service.ParkingSpaceService;
 import app.vercel.josegabriel.parking_api.web.exception.ErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -67,5 +68,21 @@ public class ParkingSpaceController {
     public ResponseEntity<ParkingSpaceResponseDTO> getByCode(@PathVariable String code) {
         var parkingSpace = parkingSpaceService.findByCode(code);
         return ResponseEntity.ok(new ParkingSpaceResponseDTO(parkingSpace));
+    }
+
+    @Operation(summary = "Excluir vagas", description = "Exclui uma vaga de estacionamento",
+            security = @SecurityRequirement(name = "security"),
+            parameters = @Parameter(name = "code", description = "Código da vaga", required = true),
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Vaga excluída com sucesso",
+                            content = @Content(mediaType = "void")),
+                    @ApiResponse(responseCode = "404", description = "Vaga não encontrada",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorMessage.class)))})
+    @DeleteMapping("/{code}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ParkingSpaceResponseDTO> delete(@PathVariable String code) {
+        parkingSpaceService.delete(code);
+        return ResponseEntity.noContent().build();
     }
 }
