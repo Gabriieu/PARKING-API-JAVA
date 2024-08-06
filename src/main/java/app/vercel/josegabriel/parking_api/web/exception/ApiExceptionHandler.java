@@ -65,10 +65,11 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> internalServerError(Exception exception, HttpServletRequest request) {
-        String error = new ErrorMessage(request,
+    public ResponseEntity<ErrorMessage> internalServerError(Exception exception, HttpServletRequest request) {
+        ErrorMessage error = new ErrorMessage(
+                request,
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()).toString();
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
 
         log.error("Internal Server Error - {} {}" + error, exception.getMessage());
         return ResponseEntity
