@@ -197,6 +197,15 @@ public class ParkController {
         return ResponseEntity.ok(parks);
     }
 
+    @Operation(summary = "Geração de relatório para o cliente",
+            description = "Gera um relatório em PDF com os registros de estacionamento do cliente logado",
+            security = @SecurityRequirement(name = "security"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Retorna o relatório em PDF",
+                            content = @Content(mediaType = "application/pdf", schema = @Schema(implementation = byte[].class))),
+                    @ApiResponse(responseCode = "403", description = "Recurso disponível apenas para clientes",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            })
     @GetMapping("/report")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<Void> getReport(HttpServletResponse response,
