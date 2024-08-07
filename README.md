@@ -1,6 +1,6 @@
 # API de Gerenciamento de Estacionamento
 
-Esta é uma API para gerenciamento de estacionamento, que permite gerenciar clientes, funcionários, vagas, check-ins e check-outs, além de gerar relatórios do histórico do cliente.
+Esta é uma API para gerenciamento de estacionamento, que permite gerenciar usuários, vagas, check-ins e check-outs, além de gerar relatórios do histórico do cliente.
 
 ## Tecnologias Utilizadas
 
